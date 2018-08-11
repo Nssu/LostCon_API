@@ -42,7 +42,7 @@ public class LostItemsResource {
         this.lostItemMapper=lostItemMapper;
     }
 
-    public void pushFirebase(String notification_title,String notification_body,int portNum,String uuid){
+    public void pushFirebase(String notification_title,String notification_body,int portNum,String uuid,int money){
         JSONObject body = new JSONObject();
         String user1_token = "fUTHMa5Rmj4:APA91bEUnSY30suqDzySyl_D15-5VyP-FNOnVOnRBnLhizcnefqhiIi7tge94qT8sO3ZctKHRgpp_mt4dDEGVy6hoqP-i1-65zlyw31vdFNnuz7NxXz01FDWUCLi0Ivnxw0JWxjU9xkNhmAFPocec1VF7wzvg4mlRg";
         String user2_token = "dhxOHEwKaKk:APA91bGgwwG3_5_T-HU0RTvTif7OY7IkKWY1CYNEPrR_qCtdkWZRnQ3MAMIRBQCh08gyYXpb1iNSGQ2b7_kn_-B7O1hIK28a60szG-T2yhtLioWL7Zu0ws0QVMtFJ8cbG-xtMrDE0kWXfC8p-VAQ56d21C9roRqPMQ";
@@ -52,6 +52,8 @@ public class LostItemsResource {
         tokenList.add(user3_token);
         tokenList.add(user1_token);
         tokenList.add(user2_token);
+
+
 
         JSONArray jsonArray = new JSONArray();
         jsonArray.add(tokenList.get(0));
@@ -70,6 +72,7 @@ public class LostItemsResource {
         JSONObject data = new JSONObject();
         data.put("portNum", portNum);
         data.put("uuid",uuid);
+        data.put("money",money);
 
 
         body.put("notification", notification);
@@ -91,25 +94,30 @@ public class LostItemsResource {
 
 
        GpsVO gpsVO = new GpsVO();
-       pushFirebase("Message","Somebody want to ur location!!",-1,lostItemVO.getItem_uuid());
+       pushFirebase("Message","Somebody want to ur location!!",-1,lostItemVO.getItem_uuid(),-1);
 
-       /*Timer m_timer = new Timer();
-       while(longitude==0) {
-           TimerTask m_task = new TimerTask() {
-               @Override
-               public void run() {
-                   System.out.println(longitude);
-                   System.out.println(latitude);
+       Timer m_timer = new Timer();
 
-               }
-           };
-           m_timer.schedule(m_task,3000);
-           if(longitude!=0)
+       TimerTask m_task = new TimerTask() {
+           @Override
+           public void run() {
+               System.out.println(longitude);
+               System.out.println(latitude);
+
+           }
+       };
+       m_timer.schedule(m_task,0,3000);
+       while(true) {
+           if (longitude != 0) {
                m_timer.cancel();
-       }*/
+               break;
+           }
+       }
+
        gpsVO.setLatitude(latitude);
        gpsVO.setLongitude(longitude);
-
+       this.latitude=0;
+       this.longitude=0;
 
        return gpsVO;
    }
@@ -123,11 +131,14 @@ public class LostItemsResource {
 //        List<Float> gpsList = new ArrayList<>();
         this.longitude = gps.getLongitude();
         this.latitude=gps.getLatitude();
+       System.out.println("longitude : "+gps.getLatitude());
+       System.out.println("latitude : "+gps.getLongitude());
+
         return new ResponseEntity<>("Thank u for ur help",HttpStatus.OK);
    }
 
    @RequestMapping(value = "/talk",method = RequestMethod.POST,produces = "application/json")
-    public String getPortNum(@RequestBody LostItemVO lostItemVO) throws ParseException {
+    public int getPortNum(@RequestBody LostItemVO lostItemVO) throws ParseException {
        // RestTemplate
        RestTemplate restTemplate = new RestTemplate();
        /*
@@ -151,7 +162,7 @@ public class LostItemsResource {
 
        // Send request with GET method, and Headers.
        ResponseEntity<String> response = restTemplate.exchange(
-               "http://192.168.0.200:3000/allocatePort?item_key="+lostItemVO.getItem_key(),
+               "http://14.53.224.85/allocatePort?item_key="+lostItemVO.getItem_key(),
                HttpMethod.GET, entity, String.class);
 
 //       String result = response.getBody();
@@ -163,9 +174,9 @@ public class LostItemsResource {
        System.out.println("portNum : "+portNum);
 
        System.out.println(result);
-       pushFirebase("Message","somebody want to talk with u",portNum,"nothing");
+       pushFirebase("Message","somebody want to talk with u",portNum,lostItemVO.getItem_uuid(),lostItemVO.getMoney());
 
-       return result;
+       return portNum;
    }
 
 

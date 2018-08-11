@@ -43,27 +43,6 @@ public class DemoApplication {
         return "hi";
     }
 
-    @RequestMapping(value = "/download", headers = ("content-type=drawable/a.png"), method = RequestMethod.POST)
-    public File upload(){
-        File file = new File("drawable/a.png");
-        return file;
-            /*InputStreamResource resource = new InputStreamResource(new FileInputStream(file));
-            HttpHeaders headers = new HttpHeaders();
-            headers.add("Content-Disposition", String.format("attachment; filename=\"%s\"", file.getName()));
-            headers.add("Cache-Control", "no-cache, no-store, must-revalidate");
-            headers.add("Pragma", "no-cache");
-            headers.add("Expires", "O");
-            ResponseEntity<Object> responseEntity = ResponseEntity.ok().headers(headers).contentLength(file.length()).contentType(MediaType.parseMediaType("application/txt")).body(resource);
-            */
-    }
-    @RequestMapping(value = "/upload",method = RequestMethod.POST,consumes=MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Object> uploadFile(@RequestParam("file")MultipartFile file, @RequestBody String name) throws IOException {
-        File convertFile = new File("src/main/resources/drawable/"+file.getOriginalFilename());
-        convertFile.createNewFile();
-        FileOutputStream fout = new FileOutputStream(convertFile);
-        fout.write(file.getBytes());
-        fout.close();
-        return new ResponseEntity<>("File is uploaded successfully",HttpStatus.OK);
-    }
+
 
 }
